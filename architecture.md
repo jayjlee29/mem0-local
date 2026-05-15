@@ -9,11 +9,11 @@ flowchart TD
         B["REST API Client"]
     end
 
-    subgraph MCP["MCP 레이어 (호스트)"]
-        C["mcp_server.py"]
-    end
-
     subgraph Docker["Docker"]
+        subgraph MCP["mem0-mcp-server :8001 (SSE)"]
+            C["mcp_server.py"]
+        end
+
         subgraph API["mem0 FastAPI :8000"]
             D["app.py"]
             E["config.py\nget_config(model)"]
@@ -29,7 +29,7 @@ flowchart TD
         G --> G2
     end
 
-    A -->|"MCP tool call\nadd / search / get_all"| C
+    A -->|"MCP tool call (SSE)\nadd / search / get_all / delete"| C
     B -->|"HTTP"| D
     C -->|"HTTP :8000"| D
     D --> E
@@ -94,4 +94,16 @@ flowchart TD
     B --> C["mem0.get_all(filters={user_id})"]
     C --> D["Qdrant\nuser_id 필터 조회"]
     D --> E["전체 메모리 목록 반환"]
+```
+
+---
+
+## delete_memory 흐름
+
+```mermaid
+flowchart TD
+    A["delete_memory(memory_id)"] --> B["DELETE /memory/:memory_id"]
+    B --> C["mem0.delete(memory_id)"]
+    C --> D["Qdrant\n해당 벡터 삭제"]
+    D --> E["{status: deleted}"]
 ```

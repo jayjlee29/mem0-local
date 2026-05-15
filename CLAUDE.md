@@ -73,6 +73,6 @@ Kafka consumer lag threshold: 100,000
 
 ## 프로젝트 정보
 
-- **인프라:** Qdrant (벡터DB), Ollama (네이티브, Metal GPU), mem0 FastAPI (Docker)
+- **인프라:** Qdrant (벡터DB :6333), Ollama (네이티브, Metal GPU :11434), mem0 API (Docker :8000), mem0-mcp-server (Docker SSE :8001), LiteLLM (Docker :4000)
 - **기본 모델:** llama3-mini (빠름), 한국어 작업 시 qwen 사용
-- **MCP 툴:** add_memory, search_memory, get_all_memories
+- **MCP 툴:** add_memory, search_memory, get_all_memories, delete_memory

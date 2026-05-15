@@ -5,18 +5,36 @@
 ## 아키텍처
 
 ```
-Claude Code (MCP)
-      │
-      ▼
-mcp_server.py  ──────►  mem0 API (Docker :8000)
-                               │
-                ┌──────────────┼──────────────┐
-                ▼              ▼              ▼
-          Qdrant (Docker)   Ollama (Native)  mem0 라이브러리
-           벡터 DB :6333     LLM :11434
+Claude Code (MCP)          Claude Code (/model)
+      │                           │
+      ▼                           ▼
+mem0-mcp-server ──►  mem0 API   LiteLLM Proxy (Docker :4000)
+(Docker :8001)      (Docker          │
+                     :8000)          ▼
+                       │       Ollama (Native :11434)
+          ┌────────────┤         Metal GPU
+          ▼            ▼
+    Qdrant (Docker)  mem0 라이브러리
+     벡터 DB :6333
 ```
 
 > **Ollama는 네이티브로 실행** — Docker 컨테이너는 Apple Silicon Metal GPU에 접근 불가. GPU 사용을 위해 Ollama를 호스트에서 직접 실행.
+
+## 디렉토리 구조
+
+```
+mem0-local/
+├── mem0/                  # mem0 API 서버
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── app.py
+│   └── config.py
+├── mem0-mcp-server/       # Claude Code MCP 서버
+│   ├── Dockerfile
+│   └── mcp_server.py
+├── docker-compose.yml
+└── .mcp.json              # Claude Code MCP 연결 설정
+```
 
 ## 구성
 
@@ -25,6 +43,8 @@ mcp_server.py  ──────►  mem0 API (Docker :8000)
 | Qdrant | Docker | 벡터 DB (메모리 저장소) | 6333 |
 | Ollama | 네이티브 (brew) | 로컬 LLM 서버 (GPU) | 11434 |
 | mem0 | Docker | 메모리 API 서버 (FastAPI) | 8000 |
+| mem0-mcp-server | Docker | Claude Code MCP 서버 (SSE) | 8001 |
+| LiteLLM | Docker | Ollama → Claude Code 프록시 | 4000 |
 
 ## 모델
 
@@ -59,7 +79,17 @@ bge-m3는 한국어·영어 혼합 텍스트에서 높은 품질의 임베딩을
 
 ## 설치
 
-### 1. Ollama 네이티브 설치 및 모델 다운로드
+### 자동 설치 (권장)
+
+```bash
+./setup.sh
+```
+
+Ollama 설치, 모델 다운로드, Docker 서비스 실행까지 한 번에 진행한다.
+
+### 수동 설치
+
+#### 1. Ollama 네이티브 설치 및 모델 다운로드
 
 ```bash
 brew install ollama
@@ -71,22 +101,46 @@ ollama pull qwen2.5:7b
 ollama pull llama3.1:8b
 ```
 
-### 2. Docker 서비스 실행
+#### 2. Docker 서비스 실행
 
 ```bash
 docker compose up -d
 ```
 
-### 3. Claude Code MCP 연동
+#### 3. Claude Code MCP 연동
 
-프로젝트 루트의 `.mcp.json`이 자동으로 MCP 서버를 등록합니다.  
-MCP 의존 패키지 설치:
+프로젝트 루트의 `.mcp.json`이 자동으로 MCP 서버를 등록합니다.
 
-```bash
-pip3 install mcp httpx
+```json
+{
+  "mcpServers": {
+    "mem0": {
+      "type": "sse",
+      "url": "http://localhost:8001/sse"
+    }
+  }
+}
 ```
 
 Claude Code 재시작 후 `/mcp`로 연결 확인.
+
+---
+
+### Claude Code에서 Ollama 모델 직접 사용 (선택)
+
+LiteLLM 프록시가 Docker로 함께 실행되므로 별도 설치 없이 바로 사용 가능하다.
+
+```bash
+ANTHROPIC_BASE_URL=http://localhost:4000 claude
+```
+
+세션 중 모델 전환:
+
+```
+/model ollama/llama3.1
+/model ollama/qwen
+/model ollama/qwen-coder
+```
 
 ## Claude Code MCP 사용법
 
@@ -97,6 +151,7 @@ Claude Code 대화 중 자동으로 mem0 툴을 사용할 수 있습니다.
 | `add_memory` | 메모리 저장 |
 | `search_memory` | 시맨틱 검색 |
 | `get_all_memories` | 전체 메모리 조회 |
+| `delete_memory` | 단건 메모리 삭제 |
 
 ## REST API
 

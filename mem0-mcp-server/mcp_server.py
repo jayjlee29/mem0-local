@@ -1,12 +1,15 @@
 import httpx
 from mcp.server.fastmcp import FastMCP
 
-MEM0_URL = "http://localhost:8000"
+import os
+
+MEM0_URL = os.environ.get("MEM0_URL", "http://localhost:8000")
 DEFAULT_USER = "claude"
 DEFAULT_MODEL = "qwen"
 TIMEOUT = 120.0
 
-mcp = FastMCP("mem0")
+port = int(os.environ.get("MCP_PORT", "8001"))
+mcp = FastMCP("mem0", port=port, host="0.0.0.0")
 
 
 @mcp.tool()
@@ -53,4 +56,5 @@ def delete_memory(memory_id: str, user_id: str = DEFAULT_USER) -> dict:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    transport = os.environ.get("MCP_TRANSPORT", "stdio")
+    mcp.run(transport=transport)
