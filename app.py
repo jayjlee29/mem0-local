@@ -66,3 +66,10 @@ def delete_memories(user_id: str, model: str = "qwen"):
     m = get_memory(model)
     m.delete_all(filters={"user_id": user_id})
     return {"status": "deleted"}
+
+
+@app.delete("/memory/{memory_id}")
+def delete_memory(memory_id: str, model: str = "qwen"):
+    m = get_memory(model)
+    m.delete(memory_id)
+    return {"status": "deleted", "id": memory_id}

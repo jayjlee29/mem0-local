@@ -119,9 +119,14 @@ curl -X PATCH http://localhost:8000/memories/{memory_id} \
   -d '{"data": "수정할 내용", "model": "llama3-mini"}'
 ```
 
-### 메모리 삭제
+### 메모리 삭제 (전체)
 ```bash
-curl -X DELETE "http://localhost:8000/memories/{user_id}?model=llama3-mini"
+curl -X DELETE "http://localhost:8000/memories/{user_id}"
+```
+
+### 메모리 삭제 (단건)
+```bash
+curl -X DELETE "http://localhost:8000/memory/{memory_id}"
 ```
 
 ### 시맨틱 검색

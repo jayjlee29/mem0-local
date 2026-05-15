@@ -38,5 +38,19 @@ def get_all_memories(user_id: str = DEFAULT_USER, model: str = DEFAULT_MODEL) ->
     return response.json()
 
 
+@mcp.tool()
+def delete_memory(memory_id: str, user_id: str = DEFAULT_USER) -> dict:
+    """메모리를 삭제합니다.
+
+    주의: 이 툴을 호출하기 전에 반드시 다음 절차를 따르세요.
+    1. search_memory 또는 get_all_memories로 삭제 대상을 찾는다.
+    2. 삭제할 메모리의 내용(memory 필드)을 사용자에게 보여준다.
+    3. 사용자에게 명시적으로 삭제 여부를 확인한다.
+    4. 사용자가 확인한 경우에만 이 툴을 호출한다.
+    """
+    response = httpx.delete(f"{MEM0_URL}/memory/{memory_id}", timeout=TIMEOUT)
+    return response.json()
+
+
 if __name__ == "__main__":
     mcp.run()
