@@ -84,15 +84,9 @@ for model in "${MODELS_OPTIONAL[@]}"; do
     fi
 done
 
-# ── 4. MCP Python 패키지 ─────────────────────────────────────────────────────
+# ── 4. Docker 서비스 시작 ────────────────────────────────────────────────────
 
-step "MCP 의존 패키지 설치"
-pip3 install --quiet --upgrade mcp httpx
-info "mcp, httpx 설치 완료"
-
-# ── 5. Docker 서비스 시작 ────────────────────────────────────────────────────
-
-step "Docker 서비스 시작 (Qdrant + mem0 + LiteLLM)"
+step "Docker 서비스 시작 (Qdrant + mem0 + mem0-mcp-server + LiteLLM)"
 docker compose up -d --build
 
 # mem0 헬스체크 대기 (최대 60초)
@@ -109,7 +103,7 @@ for i in $(seq 1 60); do
     sleep 1
 done
 
-# ── 6. 연결 확인 ─────────────────────────────────────────────────────────────
+# ── 5. 연결 확인 ─────────────────────────────────────────────────────────────
 
 step "서비스 연결 확인"
 
@@ -122,10 +116,11 @@ check_service() {
     fi
 }
 
-check_service "Ollama"    "http://localhost:11434/api/tags"
-check_service "Qdrant"    "http://localhost:6333/healthz"
-check_service "mem0 API"  "http://localhost:8000/models"
-check_service "LiteLLM"   "http://localhost:4000/health"
+check_service "Ollama"          "http://localhost:11434/api/tags"
+check_service "Qdrant"          "http://localhost:6333/healthz"
+check_service "mem0 API"        "http://localhost:8000/models"
+check_service "mem0 MCP Server" "http://localhost:8001/sse"
+check_service "LiteLLM"         "http://localhost:4000/health"
 
 # ── 완료 ─────────────────────────────────────────────────────────────────────
 
@@ -134,10 +129,11 @@ echo -e "${GREEN}================================================${NC}"
 echo -e "${GREEN}  설치 완료!${NC}"
 echo -e "${GREEN}================================================${NC}"
 echo ""
-echo "  mem0 API    : http://localhost:8000"
-echo "  API 문서    : http://localhost:8000/docs"
-echo "  Qdrant UI   : http://localhost:6333/dashboard"
-echo "  LiteLLM     : http://localhost:4000"
+echo "  mem0 API        : http://localhost:8000"
+echo "  API 문서        : http://localhost:8000/docs"
+echo "  mem0 MCP Server : http://localhost:8001/sse"
+echo "  Qdrant UI       : http://localhost:6333/dashboard"
+echo "  LiteLLM         : http://localhost:4000"
 echo ""
 echo "  Claude Code 재시작 후 /mcp 명령으로 연결을 확인하세요."
 echo ""
