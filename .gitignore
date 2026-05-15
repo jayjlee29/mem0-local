@@ -1,3 +1,4 @@
 data/
 .claude
 .mcp.json__pycache__/
+.mcp.json
