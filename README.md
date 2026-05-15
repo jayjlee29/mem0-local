@@ -69,12 +69,24 @@ bge-m3는 한국어·영어 혼합 텍스트에서 높은 품질의 임베딩을
 > **기본값은 `qwen`** — 한국어 위주 환경에서 추출 정확도 우선.
 > 속도가 중요한 경우에만 `llama3-mini`로 명시적으로 지정한다.
 
+### Claude Code 연동용 LLM (LiteLLM 프록시)
+
+| 별칭 | 모델 | 크기 | 추천 용도 |
+|------|------|------|----------|
+| `ollama/qwen` | `qwen2.5:7b` | 4.7GB | 기본 대화 |
+| `ollama/qwen14b` | `qwen2.5:14b` | 9.0GB | 고품질 대화 |
+| `ollama/qwen3-14b` | `qwen3:14b` | 9.3GB | 최신 모델, 툴 콜 성능 향상 ⭐ |
+| `ollama/qwen-coder` | `qwen2.5-coder:7b` | 4.7GB | 코딩 특화 |
+| `ollama/llama3.1` | `llama3.1:8b` | 4.9GB | 영어 대화 |
+| `ollama/llama3.2` | `llama3.2:3b` | 2.0GB | 경량, 빠른 응답 |
+
 ### 모델 선택 가이드
 
 ```
 빠른 메모리 저장/검색    → llama3-mini (기본값)
 한국어 인시던트 기록     → qwen
 영어 기술 문서 분석      → llama3
+Claude Code 연동 (권장)  → qwen3-14b
 ```
 
 ## 설치
@@ -137,8 +149,10 @@ ANTHROPIC_BASE_URL=http://localhost:4000 claude
 세션 중 모델 전환:
 
 ```
-/model ollama/llama3.1
+/model ollama/qwen3-14b     # 권장
+/model ollama/qwen14b
 /model ollama/qwen
+/model ollama/llama3.1
 /model ollama/qwen-coder
 ```
 
